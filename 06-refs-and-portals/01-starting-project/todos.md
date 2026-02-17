@@ -1,0 +1,3 @@
+--discuss when to use refs and when to use useState, what happens in both cases(when they are used)
+--discuss how to use refs to open a modal
+--discuss how refs have been forwared to components in this project
