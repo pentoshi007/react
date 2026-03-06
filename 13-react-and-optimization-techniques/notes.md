@@ -1,0 +1,15 @@
+--react builds a componnet tree, starting rom app
+--we can use profiling from react dev tools to see how long each component takes to render
+--from the starting project code we need to define what components will re-render on clicking differenct buttons and different actions
+--added memo in counter component
+--moved enteredNumber state + input/set handlers from App.jsx into new components/configure-counter.jsx and passed value back via callback to update chosenCount because reexecution of child componnets do not trigger re-rendering of the parent component
+--memoized IconButton with React.memo to avoid unnecessary re-renders when props stay the same
+--used useCallback in Counter for increment/decrement handlers so onClick prop references stay stable for memoized IconButton
+--used useMemo for isPrime(initialCount) so prime calculation runs only when initialCount changes
+--explored that react checks updates via virtual dom, and compares snapshot with previous snapshot to see if there are any changes
+--every counter here receives its own counter state, state is not shared between counters, this is what makes componnents reusable and independent
+--react tracks components by components types and position of that component in the tree(demonstrated in counter history, if we change counter state as array and track history of increament/dec by +1/-1, and hilight on +1/-1 and increment, then if 2 second one was highlighted, then new +1 will be inserted but still new second one will be highlighted). we solve this issue by giving key prop(connected to that specific counter state) to history items.
+--we can use keys to reset components, can provide key as choosen key in counter component, and initial count will also be the same as choosen key.we can also use useeffect to reset counter state when key changes.
+--state update is scheduled in react, and new state will not be available immediately in next line of the code to be used
+--react also implements batching of state updates, so if we update state multiple times in a row, react will batch them and update the state only once.
+--can use millionjs library to test performance of react app, and it will give us a score of how fast the app is.
