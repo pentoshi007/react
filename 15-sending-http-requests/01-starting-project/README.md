@@ -50,13 +50,13 @@
 
 ### Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + Vite |
-| HTTP | Native `fetch` API |
-| Backend | Node.js + Express |
-| Persistence | JSON file on disk |
-| Location | Browser `navigator.geolocation` |
+| Layer       | Technology                      |
+| ----------- | ------------------------------- |
+| Frontend    | React 18 + Vite                 |
+| HTTP        | Native `fetch` API              |
+| Backend     | Node.js + Express               |
+| Persistence | JSON file on disk               |
+| Location    | Browser `navigator.geolocation` |
 
 ---
 
@@ -86,7 +86,7 @@ useEffect(callback, dependencyArray)
 - `[someValue]` → runs after first render **and** every time `someValue` changes.
 - No array → runs after **every** render (almost always wrong for fetching).
 
-You **cannot** mark the `useEffect` callback itself as `async`. Instead, define an `async` function *inside* it and call it immediately:
+You **cannot** mark the `useEffect` callback itself as `async`. Instead, define an `async` function _inside_ it and call it immediately:
 
 ```js
 useEffect(() => {
@@ -114,16 +114,16 @@ This ensures the loading indicator is always dismissed, even if the request fail
 
 There are two categories of fetch errors you must handle:
 
-| Type | When It Happens | How to catch |
-|------|----------------|--------------|
-| **Network error** | No internet, server down | `catch(error)` block |
-| **HTTP error** | Server responds with 4xx/5xx | Check `response.ok` |
+| Type              | When It Happens              | How to catch         |
+| ----------------- | ---------------------------- | -------------------- |
+| **Network error** | No internet, server down     | `catch(error)` block |
+| **HTTP error**    | Server responds with 4xx/5xx | Check `response.ok`  |
 
 `fetch()` **does NOT throw** on HTTP errors (like 404 or 500). It only throws if there is no network connection at all. You must manually check `response.ok` and throw yourself:
 
 ```js
 if (!response.ok) {
-  throw new Error('Failed to fetch');
+  throw new Error("Failed to fetch");
 }
 ```
 
@@ -131,13 +131,15 @@ if (!response.ok) {
 
 ### 2.5 Optimistic Updating
 
-**Definition:** Update the UI *immediately* as if the operation succeeded, then sync with the server. If the server fails, *roll back* to the previous state.
+**Definition:** Update the UI _immediately_ as if the operation succeeded, then sync with the server. If the server fails, _roll back_ to the previous state.
 
 **Why use it?**
+
 - Makes the app feel instant — no waiting for a network round-trip for every interaction.
 - Users don't notice a ~50–200ms delay on a good connection.
 
 **The pattern in 3 steps:**
+
 1. Snapshot current state → `const previousState = state`
 2. Set new state immediately (the "optimistic" update)
 3. In the `catch` block, restore → `setState(previousState)`
@@ -153,14 +155,14 @@ User clicks → UI updates instantly → request sent
 
 ### 2.6 Preventing Duplicate Entries
 
-Before adding a new item to a list, check if it already exists. The idiomatic React way is to check *before* setting state, especially when paired with optimistic updates:
+Before adding a new item to a list, check if it already exists. The idiomatic React way is to check _before_ setting state, especially when paired with optimistic updates:
 
 ```js
 // Early return if duplicate — nothing updates, no request sent
-if (list.some(item => item.id === newItem.id)) return;
+if (list.some((item) => item.id === newItem.id)) return;
 ```
 
-Doing this check **before** the state setter is important — doing it *inside* the setState callback means you'd still send the network request.
+Doing this check **before** the state setter is important — doing it _inside_ the setState callback means you'd still send the network request.
 
 ---
 
@@ -185,7 +187,7 @@ Click → setUserPlaces(optimistic) → PUT /user-places
 `navigator.geolocation.getCurrentPosition(successCallback, errorCallback)` is a **browser API** that asynchronously fetches the user's physical coordinates. It is callback-based (not Promise-based), so it integrates with Promise-based fetch like this:
 
 1. Fetch places from the server first (async/await).
-2. Once places are available, *then* call `getCurrentPosition`.
+2. Once places are available, _then_ call `getCurrentPosition`.
 3. Inside the geolocation success callback, sort the already-fetched places by distance and set state.
 
 This sequential approach ensures you don't sort before you have the data.
@@ -194,11 +196,12 @@ This sequential approach ensures you don't sort before you have the data.
 
 ### 2.9 React Portals + Modal Pattern
 
-A React **Portal** renders a component's DOM output *outside* its parent DOM hierarchy — typically into a `<div id="modal">` at the root of `index.html`.
+A React **Portal** renders a component's DOM output _outside_ its parent DOM hierarchy — typically into a `<div id="modal">` at the root of `index.html`.
 
 **Why?** `<dialog>` HTML elements can have z-index and stacking context issues if nested deep in the DOM. Portals solve this by mounting them at the top level.
 
 The `<dialog>` element has native browser methods:
+
 - `.showModal()` → opens with backdrop
 - `.close()` → closes
 
@@ -227,7 +230,7 @@ The `DeleteConfirmation` component auto-confirms deletion after 3 seconds using 
 // so selections survive a page reload.
 useEffect(() => {
   async function fetchUserPlaces() {
-    const response = await fetch('http://localhost:3000/user-places');
+    const response = await fetch("http://localhost:3000/user-places");
     if (response.ok) {
       const data = await response.json();
       setUserPlaces(data.places); // Hydrate React state from server
@@ -248,26 +251,27 @@ useEffect(() => {
 
 ```jsx
 const [availablePlaces, setAvailablePlaces] = useState([]);
-const [isFetching, setIsFetching]           = useState(false);
-const [error, setError]                     = useState(null);
+const [isFetching, setIsFetching] = useState(false);
+const [error, setError] = useState(null);
 
 useEffect(() => {
   async function fetchAvailablePlaces() {
     setIsFetching(true); // ← Show loading indicator BEFORE request
     try {
-      const response = await fetch('http://localhost:3000/places');
+      const response = await fetch("http://localhost:3000/places");
       const json = await response.json();
 
       // fetch() does NOT throw on 4xx/5xx — you must check manually
       if (!response.ok) {
-        throw new Error('Failed to fetch places');
+        throw new Error("Failed to fetch places");
       }
 
       setAvailablePlaces(json.places);
     } catch (error) {
       // Catches both network errors AND our manually thrown HTTP errors
       setError({
-        message: error.message || 'Could not fetch places, please try again later.'
+        message:
+          error.message || "Could not fetch places, please try again later.",
       });
     } finally {
       setIsFetching(false); // ← ALWAYS hide loading, success or failure
@@ -300,7 +304,7 @@ navigator.geolocation.getCurrentPosition(
     const sortedPlaces = sortPlacesByDistance(
       json.places,
       position.coords.latitude,
-      position.coords.longitude
+      position.coords.longitude,
     );
     setAvailablePlaces(sortedPlaces); // Show places nearest to user first
     setIsFetching(false);
@@ -309,11 +313,11 @@ navigator.geolocation.getCurrentPosition(
   () => {
     setAvailablePlaces(json.places); // Show unsorted — graceful degradation
     setIsFetching(false);
-  }
+  },
 );
 ```
 
-**Key Insight:** This is sequential async logic — fetch must complete before geolocation starts, because the sort function needs the places data. The geolocation API is callback-based, so `isFetching` is set to `false` *inside both callbacks*, not in a `finally` block.
+**Key Insight:** This is sequential async logic — fetch must complete before geolocation starts, because the sort function needs the places data. The geolocation API is callback-based, so `isFetching` is set to `false` _inside both callbacks_, not in a `finally` block.
 
 **Graceful degradation:** If the user denies location, the app still works — it just shows unsorted places. Never assume the happy path.
 
@@ -330,26 +334,26 @@ async function handleSelectPlace(selectedPlace) {
     return;
   }
 
-  const previousPlaces = userPlaces;           // 1. Snapshot for rollback
+  const previousPlaces = userPlaces; // 1. Snapshot for rollback
   const updatedPlaces = [selectedPlace, ...previousPlaces];
 
-  setUserPlaces(updatedPlaces);                // 2. Optimistic UI update — instant!
+  setUserPlaces(updatedPlaces); // 2. Optimistic UI update — instant!
 
   try {
-    const response = await fetch('http://localhost:3000/user-places', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("http://localhost:3000/user-places", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ places: updatedPlaces }), // 3. Sync with server
     });
 
     if (!response.ok) {
-      setUserPlaces(previousPlaces);           // 4a. Rollback on HTTP error
-      throw new Error('Failed to add place');
+      setUserPlaces(previousPlaces); // 4a. Rollback on HTTP error
+      throw new Error("Failed to add place");
     }
   } catch (error) {
-    setUserPlaces(previousPlaces);             // 4b. Rollback on network error
+    setUserPlaces(previousPlaces); // 4b. Rollback on network error
     setErrorUpdatingPlaces({
-      title: 'Failed to add place',
+      title: "Failed to add place",
       message: error.message,
     });
   }
@@ -367,34 +371,40 @@ async function handleSelectPlace(selectedPlace) {
 ```jsx
 // useCallback memoizes the function — avoids recreating it on every render
 // Required because it's passed as a prop and used in a useEffect dependency array
-const handleRemovePlace = useCallback(async function handleRemovePlace() {
-  const previousPlaces = userPlaces;
-  // Compute the new list by filtering out the selected place
-  const updatedPlaces = userPlaces.filter(
-    (place) => place.id !== selectedPlace.current.id
-    //                      ↑ .current accesses the ref value
-  );
+const handleRemovePlace = useCallback(
+  async function handleRemovePlace() {
+    const previousPlaces = userPlaces;
+    // Compute the new list by filtering out the selected place
+    const updatedPlaces = userPlaces.filter(
+      (place) => place.id !== selectedPlace.current.id,
+      //                      ↑ .current accesses the ref value
+    );
 
-  setUserPlaces(updatedPlaces);  // Optimistic: remove from UI immediately
+    setUserPlaces(updatedPlaces); // Optimistic: remove from UI immediately
 
-  try {
-    const response = await fetch('http://localhost:3000/user-places', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ places: updatedPlaces }),
-    });
+    try {
+      const response = await fetch("http://localhost:3000/user-places", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ places: updatedPlaces }),
+      });
 
-    if (!response.ok) {
-      setUserPlaces(previousPlaces);       // Rollback
-      throw new Error('Failed to remove place');
+      if (!response.ok) {
+        setUserPlaces(previousPlaces); // Rollback
+        throw new Error("Failed to remove place");
+      }
+
+      setModalIsOpen(false); // Only close modal on confirmed success
+    } catch (error) {
+      setUserPlaces(previousPlaces);
+      setErrorUpdatingPlaces({
+        title: "Failed to remove place",
+        message: error.message,
+      });
     }
-
-    setModalIsOpen(false); // Only close modal on confirmed success
-  } catch (error) {
-    setUserPlaces(previousPlaces);
-    setErrorUpdatingPlaces({ title: 'Failed to remove place', message: error.message });
-  }
-}, [userPlaces]); // userPlaces in deps so the closure always uses fresh state
+  },
+  [userPlaces],
+); // userPlaces in deps so the closure always uses fresh state
 ```
 
 **Key Insight:** `useRef` is used to store the "selected place" without triggering a re-render (unlike `useState`). A ref value persists across renders and is mutable — perfect for "which item did the user click?" that doesn't need to drive UI output.
@@ -408,8 +418,8 @@ const handleRemovePlace = useCallback(async function handleRemovePlace() {
 **File:** `src/components/Modal.jsx`
 
 ```jsx
-import { useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 function Modal({ open, children, onClose }) {
   const dialog = useRef(); // Reference to the <dialog> DOM element
@@ -428,9 +438,9 @@ function Modal({ open, children, onClose }) {
   // which is outside this component's DOM parent.
   return createPortal(
     <dialog className="modal" ref={dialog} onClose={onClose}>
-      {open ? children : null}  {/* Don't render children when closed */}
+      {open ? children : null} {/* Don't render children when closed */}
     </dialog>,
-    document.getElementById('modal') // Target in index.html
+    document.getElementById("modal"), // Target in index.html
   );
 }
 ```
@@ -507,7 +517,7 @@ export default function Places({
   fallbackText,
   onSelectPlace,
   isLoading,
-  LoadingText
+  LoadingText,
 }) {
   return (
     <section className="places-category">
@@ -522,7 +532,10 @@ export default function Places({
           {places.map((place) => (
             <li key={place.id} className="place-item">
               <button onClick={() => onSelectPlace(place)}>
-                <img src={`http://localhost:3000/${place.image.src}`} alt={place.image.alt} />
+                <img
+                  src={`http://localhost:3000/${place.image.src}`}
+                  alt={place.image.alt}
+                />
                 <h3>{place.title}</h3>
               </button>
             </li>
@@ -574,42 +587,42 @@ export default function Error({ title, message, onConfirm }) {
 **File:** `backend/app.js`
 
 ```js
-import fs from 'node:fs/promises'; // Node built-in: async file system
-import express from 'express';
-import bodyParser from 'body-parser';
+import fs from "node:fs/promises"; // Node built-in: async file system
+import express from "express";
+import bodyParser from "body-parser";
 
 const app = express();
-app.use(express.static('images')); // Serve images folder as static files
-app.use(bodyParser.json());        // Parse JSON request bodies
+app.use(express.static("images")); // Serve images folder as static files
+app.use(bodyParser.json()); // Parse JSON request bodies
 
 // CORS headers — allow the React dev server (different origin) to call this API
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, PUT");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   next(); // Must call next() to pass to the next middleware
 });
 
 // GET all available places (static data)
-app.get('/places', async (req, res) => {
-  const fileContent = await fs.readFile('./data/places.json');
+app.get("/places", async (req, res) => {
+  const fileContent = await fs.readFile("./data/places.json");
   const placesData = JSON.parse(fileContent);
   res.status(200).json({ places: placesData });
 });
 
 // GET user's saved places
-app.get('/user-places', async (req, res) => {
-  const fileContent = await fs.readFile('./data/user-places.json');
+app.get("/user-places", async (req, res) => {
+  const fileContent = await fs.readFile("./data/user-places.json");
   const places = JSON.parse(fileContent);
   res.status(200).json({ places });
 });
 
 // PUT (replace entirely) the user's saved places
 // This is idempotent — sending the same request twice produces the same result
-app.put('/user-places', async (req, res) => {
+app.put("/user-places", async (req, res) => {
   const places = req.body.places; // Extracted by bodyParser.json()
-  await fs.writeFile('./data/user-places.json', JSON.stringify(places));
-  res.status(200).json({ message: 'User places updated!' });
+  await fs.writeFile("./data/user-places.json", JSON.stringify(places));
+  res.status(200).json({ message: "User places updated!" });
 });
 
 app.listen(3000);
@@ -638,8 +651,10 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.sin(dLon / 2) * Math.sin(dLon / 2) *
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2));
+    Math.sin(dLon / 2) *
+      Math.sin(dLon / 2) *
+      Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2));
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
@@ -815,13 +830,13 @@ stateDiagram-v2
 
 ### The 5 Core Rules of HTTP in React
 
-| # | Rule |
-|---|------|
-| 1 | **Never fetch in render body** — always inside `useEffect` or event handlers |
-| 2 | **`fetch()` does not throw on 4xx/5xx** — always check `response.ok` manually |
-| 3 | **Define `async` inside `useEffect`**, don't make the effect callback itself async |
-| 4 | **Always clean up** timers and intervals in `useEffect`'s return function |
-| 5 | **Use `finally`** (or set loading state in both branches) to guarantee loading is reset |
+| #   | Rule                                                                                    |
+| --- | --------------------------------------------------------------------------------------- |
+| 1   | **Never fetch in render body** — always inside `useEffect` or event handlers            |
+| 2   | **`fetch()` does not throw on 4xx/5xx** — always check `response.ok` manually           |
+| 3   | **Define `async` inside `useEffect`**, don't make the effect callback itself async      |
+| 4   | **Always clean up** timers and intervals in `useEffect`'s return function               |
+| 5   | **Use `finally`** (or set loading state in both branches) to guarantee loading is reset |
 
 ---
 
@@ -840,29 +855,29 @@ stateDiagram-v2
 
 ### Key React Patterns Used
 
-| Pattern | Used In | Purpose |
-|---------|---------|---------|
-| `useEffect(() => { async fn(); fn(); }, [])` | `App.jsx`, `AvailablePlaces.jsx` | Fetch on mount |
-| `useRef` for non-state values | `App.jsx` (selectedPlace) | Store mutable value without triggering re-render |
-| `useCallback` | `handleRemovePlace` | Stable function reference for effect dependencies |
-| `createPortal` | `Modal.jsx` | Render outside DOM hierarchy |
-| Early return on error | `AvailablePlaces.jsx` | Clean conditional rendering |
-| Optimistic update + rollback | `handleSelectPlace`, `handleRemovePlace` | Instant UI, safe persistence |
-| Cleanup function | `DeleteConfirmation`, `ProgressBar` | Prevent stale timers/intervals |
-| Conditional prop render | `Error.jsx` (`onConfirm &&`) | Flexible, reusable component |
+| Pattern                                      | Used In                                  | Purpose                                           |
+| -------------------------------------------- | ---------------------------------------- | ------------------------------------------------- |
+| `useEffect(() => { async fn(); fn(); }, [])` | `App.jsx`, `AvailablePlaces.jsx`         | Fetch on mount                                    |
+| `useRef` for non-state values                | `App.jsx` (selectedPlace)                | Store mutable value without triggering re-render  |
+| `useCallback`                                | `handleRemovePlace`                      | Stable function reference for effect dependencies |
+| `createPortal`                               | `Modal.jsx`                              | Render outside DOM hierarchy                      |
+| Early return on error                        | `AvailablePlaces.jsx`                    | Clean conditional rendering                       |
+| Optimistic update + rollback                 | `handleSelectPlace`, `handleRemovePlace` | Instant UI, safe persistence                      |
+| Cleanup function                             | `DeleteConfirmation`, `ProgressBar`      | Prevent stale timers/intervals                    |
+| Conditional prop render                      | `Error.jsx` (`onConfirm &&`)             | Flexible, reusable component                      |
 
 ---
 
 ### HTTP Verbs Used and Why
 
-| Verb | Endpoint | Why This Verb? |
-|------|----------|----------------|
-| `GET` | `/places` | Read-only, no side effects |
-| `GET` | `/user-places` | Read saved user selections |
+| Verb  | Endpoint       | Why This Verb?                                             |
+| ----- | -------------- | ---------------------------------------------------------- |
+| `GET` | `/places`      | Read-only, no side effects                                 |
+| `GET` | `/user-places` | Read saved user selections                                 |
 | `PUT` | `/user-places` | Replace the **entire** user list (idempotent full-replace) |
 
 > `PUT` vs `POST`: Use `PUT` when you're sending the complete new state of a resource. Use `POST` when appending a single new item. This app always syncs the full array → `PUT`.
 
 ---
 
-*Generated as a revision guide for Section 15 of the JS-React course. All diagrams use dark backgrounds for readability.*
+_Generated as a revision guide for Section 15 of the JS-React course. All diagrams use dark backgrounds for readability._
