@@ -1,0 +1,2 @@
+--forms actions can be used in react 19 and above, here handle submit gets formData as an object, in case of onSubmit, we get event as a parameter, and we have to prevent the default behavior of the form, and then we can get the formData from the event.target.formData
+--actions are already available in html
